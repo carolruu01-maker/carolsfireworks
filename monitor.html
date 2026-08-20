@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>烟花通讯面板</title>
+    <link rel="stylesheet" href="monitor.css" />
+  </head>
+  <body>
+    <main class="monitor-shell">
+      <header class="monitor-header">
+        <div>
+          <div class="eyebrow"><span class="pulse"></span> FIREWORKS / NETWORK OBSERVER</div>
+          <h1>烟花通讯面板</h1>
+          <p>实时观察客户端与服务端之间的一次烟花是如何被传递、处理和广播的。</p>
+        </div>
+        <div id="serverState" class="server-state"><span></span>正在连接服务端</div>
+      </header>
+
+      <section class="metrics" aria-label="通讯统计">
+        <div class="metric-card"><span>在线客户端</span><strong id="clientCount">0</strong><small>CONNECTED</small></div>
+        <div class="metric-card"><span>服务端接收</span><strong id="receiveCount">0</strong><small>RECEIVED</small></div>
+        <div class="metric-card"><span>广播事件</span><strong id="broadcastCount">0</strong><small>BROADCAST</small></div>
+        <div class="metric-card accent"><span>当前状态</span><strong id="flowState">等待中</strong><small id="lastEvent">LIVE MONITOR</small></div>
+      </section>
+
+      <section class="ai-config" aria-label="AI 配置">
+        <div class="ai-config-copy"><span>AI CONFIGURATION</span><small>仅保存在当前本机服务进程内存中</small></div>
+        <select id="providerInput" aria-label="AI 提供商"><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option><option value="custom">其他兼容接口</option></select>
+        <input id="baseUrlInput" type="url" placeholder="Base URL（自定义接口）" />
+        <input id="apiKeyInput" type="password" placeholder="输入 API Key" autocomplete="off" />
+        <input id="modelInput" type="text" placeholder="模型名（可选）" value="gpt-4o-mini" />
+        <button id="saveAIConfig" type="button">保存配置</button>
+        <div id="aiConfigState" class="ai-config-state">未配置</div>
+      </section>
+
+      <section class="ai-prompt-panel" aria-label="LLM Prompt 编辑">
+        <div class="section-title"><span>LLM SYSTEM PROMPT / 可编辑基础指令</span><button id="savePrompt" type="button">保存 Prompt</button></div>
+        <textarea id="promptInput" rows="7" placeholder="输入发送给 LLM 的系统 Prompt"></textarea>
+        <div id="promptState" class="panel-note">保存后作用于下一次 AI 生成。下方显示本次实际发送给 LLM 的完整 System Prompt。</div>
+        <pre id="effectivePrompt" class="effective-prompt">等待 AI Creative Lab 生成烟花…</pre>
+      </section>
+
+      <section class="point-panel" aria-label="LLM 点阵预览">
+        <div class="section-title"><span>LLM PARTICLE ARRAY</span><span id="pointMeta">等待 LLM 生成点阵</span></div>
+        <div class="point-grid">
+          <canvas id="pointCanvas" width="760" height="360" aria-label="LLM 生成的粒子点阵预览"></canvas>
+          <div class="point-info"><span>AI Creative Lab 用户输入</span><strong id="pointPrompt">—</strong><span>后端返回结构</span><strong id="pointShape">—</strong><span>LLM 坐标数量</span><strong id="pointCount">0</strong></div>
+        </div>
+      </section>
+
+      <section class="pipeline" aria-label="通讯流程">
+        <div class="pipeline-head"><span>EVENT PIPELINE</span><span id="eventHint">等待客户端发射烟花…</span></div>
+        <div class="flow-track">
+          <div class="flow-node client"><i>01</i><b>客户端</b><small>点击放烟花</small></div>
+          <div class="flow-line"><span></span></div>
+          <div class="flow-node server"><i>02</i><b>服务端</b><small>接收 / 处理</small></div>
+          <div class="flow-line"><span></span></div>
+          <div class="flow-node server"><i>03</i><b>广播层</b><small>SSE 广播</small></div>
+          <div class="flow-line"><span></span></div>
+          <div class="flow-node client"><i>04</i><b>其他客户端</b><small>渲染烟花</small></div>
+        </div>
+      </section>
+
+      <section class="event-section">
+        <div class="section-title"><span>LIVE EVENT STREAM</span><button id="clearLogs" type="button">清空日志</button></div>
+        <div id="eventList" class="event-list"><div class="empty-state">服务端事件会显示在这里</div></div>
+      </section>
+      <footer>LOCAL SERVER · /monitor-events · VERSION 03</footer>
+    </main>
+    <script src="monitor.js"></script>
+  </body>
+</html>

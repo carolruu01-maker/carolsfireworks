@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>夜空放烟花</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="scene">
+      <canvas id="fireworks" aria-label="烟花夜空画布"></canvas>
+
+      <section class="intro" aria-label="使用说明">
+        <div class="eyebrow"><span class="live-dot"></span> NIGHT SKY / 01</div>
+        <h1>今晚，<em>放点烟花。</em></h1>
+        <p>点击夜空任意位置，让灵感升空。</p>
+      </section>
+
+      <div class="hud top-right">
+        <div class="version-tag" id="versionTag">VERSION 02</div>
+        <div class="version-switcher" aria-label="版本切换">
+          <button class="version-option" data-version="1" type="button">V1</button>
+          <button class="version-option active" data-version="2" type="button">V2</button>
+          <button class="version-option" data-version="3" type="button">V3</button>
+          <button class="version-option" data-version="4" type="button">V4</button>
+          <button class="version-option" data-version="5" type="button">V5</button>
+          <button class="version-option" data-version="6" type="button">V6</button>
+          <button class="version-option" data-version="7" type="button">V7</button>
+          <button class="version-option" data-version="8" type="button">V8</button>
+          <button class="version-option" data-version="10" type="button">V10</button>
+        </div>
+        <div class="status"><span class="status-dot"></span><span id="statusText">夜空已就绪</span></div>
+        <div class="count"><span id="launchCount">0</span><small>次绽放</small></div>
+      </div>
+
+      <div class="hud bottom-left">
+        <div class="key-hint"><kbd>CLICK</kbd><span>发射烟花</span></div>
+        <div class="key-hint"><kbd>C</kbd><span>清空夜空</span></div>
+      </div>
+
+      <div class="controls" aria-label="控制面板">
+        <a class="control-button ghost" href="monitor.html" target="_blank" rel="noopener">通讯面板</a>
+        <button id="autoButton" class="control-button" type="button">
+          <span class="button-icon">✦</span>
+          <span id="autoLabel">自动演示</span>
+        </button>
+        <button id="clearButton" class="control-button ghost" type="button" aria-label="清空烟花">清屏</button>
+      </div>
+
+      <div class="shape-picker" aria-label="烟花形状选择">
+        <div class="shape-label">SHAPE / 形状</div>
+        <div class="shape-options">
+          <button class="shape-option selected" data-shape="random" type="button">随机</button>
+          <button class="shape-option" data-shape="star" type="button">星</button>
+          <button class="shape-option" data-shape="heart" type="button">心</button>
+          <button class="shape-option" data-shape="burst" type="button">烟花</button>
+          <button class="shape-option" data-shape="text" type="button">文字</button>
+        </div>
+        <input id="textInput" class="text-input" maxlength="8" type="text" placeholder="输入文字" aria-label="烟花文字" disabled />
+      </div>
+
+      <div id="collabPanel" class="collab-panel" hidden>
+        <div class="collab-label"><span id="connectionDot" class="connection-dot"></span><span id="connectionText">多人模式未连接</span></div>
+        <div class="collab-form">
+          <input id="usernameInput" maxlength="16" type="text" placeholder="你的名字" aria-label="你的名字" />
+          <button id="joinButton" class="control-button" type="button">加入多人</button>
+        </div>
+        <div id="roomControls" class="room-controls" hidden>
+          <input id="roomInput" maxlength="6" type="text" placeholder="房间号" aria-label="房间号" autocomplete="off" />
+          <input id="roomPasswordInput" maxlength="32" type="password" placeholder="房间密码" aria-label="房间密码" autocomplete="off" />
+          <button id="createRoomButton" class="room-button" type="button">创建房间</button>
+        </div>
+        <div id="roomHint" class="room-hint" hidden>创建房间时设置密码，再把房间号和密码发给朋友</div>
+        <div id="mergeRule" class="merge-rule" hidden>合并条件：5 秒内 · 60 像素内</div>
+      </div>
+
+      <div id="lobbyPanel" class="lobby-panel" hidden>
+        <input id="chatInput" maxlength="42" type="text" placeholder="在大厅发送弹幕…" aria-label="大厅弹幕" />
+        <button id="sendChatButton" class="room-button" type="button">发送</button>
+      </div>
+
+      <section id="editorPanel" class="editor-panel" hidden aria-label="烟花作品编辑器">
+        <div class="editor-title"><span>FIREWORK MAKER</span><small>作品编辑器</small></div>
+        <label>形状<select id="workShape"><option value="random">随机</option><option value="star">星</option><option value="heart">心</option><option value="burst">烟花</option><option value="text">文字</option><option value="custom">AI 图形</option></select></label>
+        <label>文字<input id="workText" maxlength="8" type="text" placeholder="输入文字" /></label>
+        <div class="editor-row"><label>颜色<input id="workColor" type="color" value="#ffb55b" /></label><label>大小<input id="workSize" type="range" min="0.5" max="2.2" step="0.1" value="1" /></label></div>
+        <label>速度<input id="workSpeed" type="range" min="0.6" max="1.8" step="0.1" value="1" /></label>
+        <div class="editor-actions"><button id="saveWorkButton" class="room-button" type="button">保存作品</button><button id="shareWorkButton" class="room-button secondary" type="button">分享当前</button></div>
+        <button id="testWorkButton" class="test-work-button" type="button">测试下一发</button>
+        <div id="workStatus" class="work-status">作品会保存在本机</div>
+      </section>
+
+      <section id="workGallery" class="work-gallery" hidden aria-label="我的烟花作品">
+        <div class="gallery-title">MY WORKS <span>点击作品播放</span></div>
+        <div id="workList" class="work-list"></div>
+      </section>
+
+      <section id="aiPanel" class="ai-panel" hidden aria-label="AI 创作助手">
+        <div class="ai-title"><span>AI CREATIVE LAB</span><small>自然语言创作</small></div>
+        <textarea id="aiPrompt" maxlength="180" placeholder="例如：做一个蓝紫色、慢速、像银河一样的烟花"></textarea>
+        <div class="ai-actions"><button id="aiFireworkButton" type="button">生成烟花</button><button id="aiTextButton" type="button">生成文字</button><button id="aiThemeButton" type="button">生成主题</button></div>
+        <div id="aiResult" class="ai-result">告诉 AI 你想看到什么</div>
+      </section>
+
+      <section id="galaxyPanel" class="galaxy-panel" hidden aria-label="生日银河生成器">
+        <div class="galaxy-head">
+          <span>BIRTHDAY GALAXY</span>
+          <small>生日银河生成器</small>
+        </div>
+        <div class="galaxy-field">
+          <label for="galaxyDate">输入生日（年月日）</label>
+          <div class="galaxy-row">
+            <div class="galaxy-date-wrap">
+              <input id="galaxyDate" type="date" value="1982-03-10" min="1900-01-01" max="2026-12-31" aria-label="生日年月日" />
+            </div>
+            <button id="galaxyCompute" type="button">推算银河</button>
+          </div>
+        </div>
+        <p id="galaxyStatus" class="galaxy-status">输入生日后，推算当天的银河状态</p>
+        <canvas id="galaxyPreview" class="galaxy-preview" width="720" height="400" aria-label="银河像素预览"></canvas>
+        <p id="galaxyMeta" class="galaxy-meta">默认按北半球午夜模型推算</p>
+        <div class="galaxy-actions">
+          <button id="galaxyLaunch" type="button">立即放出银河烟花</button>
+          <button id="galaxyTest" type="button">测试下一发</button>
+        </div>
+      </section>
+      <button id="galaxyBack" class="galaxy-back" type="button" hidden>返回生日银河</button>
+
+      <div id="danmakuLayer" class="danmaku-layer" aria-live="polite"></div>
+      <div id="replyNotice" class="reply-notice" role="status" hidden>
+        <span class="reply-notice-icon">↩</span>
+        <span><b id="replyNoticeTitle">你被回复了</b><small id="replyNoticeText"></small></span>
+      </div>
+
+      <div class="signature">FIREWORKS<br /><span>LOCAL EXPERIENCE</span></div>
+
+      <div id="mergeDebug" class="merge-debug" hidden>
+        <div class="merge-debug-kicker">MERGE EVENT / DEBUG</div>
+        <strong>合并触发</strong>
+        <span id="mergeDebugDetail">两枚烟花正在合并</span>
+      </div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
