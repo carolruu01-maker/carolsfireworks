@@ -274,7 +274,7 @@ function applyGalaxyState(state) {
   galaxyStatus.textContent = `已生成 ${formatGalaxyDate(state)} 的银河状态，点击“立即放出”观看像素银河`;
   galaxyMeta.textContent = `银河季节：${state.season} · ${state.morph} · ${tilt} · ${palette.name} · 核心亮度 ${state.core}% · 点阵 ${galaxyPoints.length} 点 · 默认按北半球午夜模型推算`;
   drawGalaxyPreview();
-  statusEl.textContent = `版本 10 · ${formatGalaxyDate(state)} 银河已就绪`;
+  statusEl.textContent = `版本 3 · ${formatGalaxyDate(state)} 银河已就绪`;
 }
 
 function computeAndRenderGalaxy() {
@@ -289,7 +289,7 @@ function computeAndRenderGalaxy() {
 
 function fireworkStage() {
   const panel = galaxyPanel?.getBoundingClientRect();
-  const left = currentVersion === 10 && panel && !galaxyPanel.hidden ? Math.min(panel.right + 18, width * .56) : width * .18;
+  const left = currentVersion === 3 && panel && !galaxyPanel.hidden ? Math.min(panel.right + 18, width * .56) : width * .18;
   const top = 150;
   const right = width - 28;
   const bottom = height - 72;
@@ -363,7 +363,7 @@ function showMergeDebug(data) {
   showMergeDebug.timer = window.setTimeout(() => { mergeDebug.hidden = true; }, 2600);
 }
 
-function clearSky() { rockets = []; particles = []; labels = []; mergeBursts = []; launches = 0; countEl.textContent = '0'; statusEl.textContent = currentVersion === 10 ? '版本 10 · 夜空已清空' : '夜空已清空'; setGalaxyWatching(false); }
+function clearSky() { rockets = []; particles = []; labels = []; mergeBursts = []; launches = 0; countEl.textContent = '0'; statusEl.textContent = currentVersion === 3 ? '版本 3 · 夜空已清空' : '夜空已清空'; setGalaxyWatching(false); }
 
 function loop(now) {
   const dt = Math.min((now - lastTime) / 1000, .035); lastTime = now;
@@ -418,42 +418,39 @@ function loop(now) {
 function editorLaunchOptions() { return { shape: workShape.value, text: workText.value.trim() || '嗨', points: editorPoints, color: workColor.value, size: Number(workSize.value), speed: Number(workSpeed.value) }; }
 function consumeTestWork() { testNextWork = false; testWorkButton.classList.remove('active'); testWorkButton.textContent = '测试下一发'; }
 function broadcastLaunch(x, y, id, options = {}) {
-  if (currentVersion < 3 || !eventSource || eventSource.readyState !== EventSource.OPEN) return;
-  fetch('/api/launch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId, id, timestamp: Date.now(), username, x: x / width, y: y / height, width, height, shape: options.shape || selectedShape, text: options.text || textInput.value.trim() || '嗨', points: options.points || [], color: options.color, size: options.size, speed: options.speed }) }).catch(() => setConnectionState(false, '连接中断 · 仅本地'));
+  return;
 }
 
-scene.addEventListener('click', e => { if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('select') || e.target.closest('textarea') || e.target.closest('.galaxy-panel')) return; if (currentVersion === 10) { if (galaxyTestNext) { galaxyTestNext = false; galaxyTest.classList.remove('active'); launchGalaxyFirework(true); } return; } const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`; const options = testNextWork && currentVersion >= 7 ? editorLaunchOptions() : {}; launch(e.clientX, e.clientY, { id, ...options }); broadcastLaunch(e.clientX, e.clientY, id, options); if (testNextWork) consumeTestWork(); });
+scene.addEventListener('click', e => { if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('select') || e.target.closest('textarea') || e.target.closest('.galaxy-panel')) return; if (currentVersion === 3) { if (galaxyTestNext) { galaxyTestNext = false; galaxyTest.classList.remove('active'); launchGalaxyFirework(true); } return; } const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`; launch(e.clientX, e.clientY, { id }); broadcastLaunch(e.clientX, e.clientY, id); });
 clearButton.addEventListener('click', clearSky);
 shapeOptions.forEach(option => option.addEventListener('click', () => { selectedShape = option.dataset.shape; shapeOptions.forEach(item => item.classList.toggle('selected', item === option)); textInput.disabled = selectedShape !== 'text'; if (selectedShape === 'text') textInput.focus(); }));
 function versionLabel(version) { return `VERSION ${String(version).padStart(2, '0')}`; }
 function switchVersion(version) {
   auto = false; autoLabel.textContent = '自动演示'; autoButton.classList.remove('active'); clearInterval(autoTimer); autoTimer = null;
   if (eventSource) disconnectRealtime();
-  currentVersion = Number(version); audioEnabled = currentVersion === 2;
-  if (currentVersion >= 2) audioEnabled = true;
+  currentVersion = Number(version);
+  audioEnabled = currentVersion >= 2;
   versionTag.textContent = versionLabel(currentVersion);
   versionOptions.forEach(option => option.classList.toggle('active', Number(option.dataset.version) === currentVersion));
-  shapePicker.hidden = currentVersion === 1 || currentVersion === 10;
-  intro.hidden = currentVersion === 10;
-  document.querySelector('.controls').hidden = currentVersion === 10;
-  galaxyPanel.hidden = currentVersion !== 10;
-  if (currentVersion !== 10) setGalaxyWatching(false);
-  collabPanel.hidden = currentVersion < 3 || currentVersion === 10;
-  roomControls.hidden = currentVersion < 5;
-  roomHint.hidden = currentVersion < 5;
-  if (currentVersion === 6) roomHint.textContent = '留空房间号进入公共大厅；填写房间号和密码进入私密房间';
-  if (currentVersion === 7 || currentVersion === 8) roomHint.textContent = '进入房间后，可以把作品分享给同房间的人';
-  mergeRule.hidden = currentVersion < 4;
-  lobbyPanel.hidden = currentVersion !== 6;
-  editorPanel.hidden = currentVersion < 7 || currentVersion === 10;
-  workGallery.hidden = currentVersion < 7 || currentVersion === 10;
-  aiPanel.hidden = currentVersion !== 8;
-  if (currentVersion >= 7) renderWorks();
-  statusEl.textContent = currentVersion === 1 ? '版本 1 · 夜空已就绪' : currentVersion === 2 ? '版本 2 · 夜空已就绪' : currentVersion === 3 ? '版本 3 · 多人模式' : currentVersion === 4 ? '版本 4 · 合并模式' : currentVersion === 5 ? '版本 5 · 房间模式' : currentVersion === 6 ? '版本 6 · 大厅模式' : currentVersion === 7 ? '版本 7 · 作品编辑' : currentVersion === 8 ? '版本 8 · AI 创作' : '版本 10 · 生日银河';
+  const isGalaxy = currentVersion === 3;
+  shapePicker.hidden = currentVersion === 1 || isGalaxy;
+  intro.hidden = isGalaxy;
+  document.querySelector('.controls').hidden = isGalaxy;
+  galaxyPanel.hidden = !isGalaxy;
+  if (!isGalaxy) setGalaxyWatching(false);
+  collabPanel.hidden = true;
+  roomControls.hidden = true;
+  roomHint.hidden = true;
+  mergeRule.hidden = true;
+  lobbyPanel.hidden = true;
+  editorPanel.hidden = true;
+  workGallery.hidden = true;
+  aiPanel.hidden = true;
+  statusEl.textContent = currentVersion === 1 ? '版本 1 · 夜空已就绪' : currentVersion === 2 ? '版本 2 · 夜空已就绪' : '版本 3 · 生日银河';
   if (currentVersion === 1) { selectedShape = 'random'; textInput.disabled = true; shapeOptions.forEach(item => item.classList.toggle('selected', item.dataset.shape === 'random')); }
-  if (currentVersion >= 3) { textInput.disabled = selectedShape !== 'text'; setConnectionState(false, location.protocol === 'file:' ? '请用服务器地址打开' : '多人模式未连接'); }
-  if (currentVersion < 3) disconnectRealtime();
-  if (currentVersion === 10) computeAndRenderGalaxy();
+  if (currentVersion === 2) textInput.disabled = selectedShape !== 'text';
+  disconnectRealtime();
+  if (isGalaxy) computeAndRenderGalaxy();
 }
 versionOptions.forEach(option => option.addEventListener('click', () => switchVersion(option.dataset.version)));
 
@@ -569,8 +566,8 @@ galaxyPanel.addEventListener('click', event => event.stopPropagation());
 galaxyDate.addEventListener('change', computeAndRenderGalaxy);
 galaxyDate.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); computeAndRenderGalaxy(); } });
 galaxyBack.addEventListener('click', event => { event.stopPropagation(); setGalaxyWatching(false); });
-autoButton.addEventListener('click', () => { auto = !auto; autoLabel.textContent = auto ? '停止演示' : '自动演示'; statusEl.textContent = auto ? '自动演示中' : '夜空已就绪'; autoButton.classList.toggle('active', auto); if (auto) { if (currentVersion === 10) launchGalaxyFirework(); else launch(); autoTimer = setInterval(() => currentVersion === 10 ? launchGalaxyFirework() : launch(), currentVersion === 10 ? 4200 : 700 + Math.random() * 850); } else { clearInterval(autoTimer); autoTimer = null; } });
-window.addEventListener('keydown', e => { if (e.key === 'Escape') { setGalaxyWatching(false); } if (e.target.closest('input') || e.target.closest('textarea')) return; if (e.key.toLowerCase() === 'c') clearSky(); if (e.key.toLowerCase() === 'r') currentVersion === 10 ? launchGalaxyFirework() : launch(); });
+autoButton.addEventListener('click', () => { auto = !auto; autoLabel.textContent = auto ? '停止演示' : '自动演示'; statusEl.textContent = auto ? '自动演示中' : '夜空已就绪'; autoButton.classList.toggle('active', auto); if (auto) { if (currentVersion === 3) launchGalaxyFirework(); else launch(); autoTimer = setInterval(() => currentVersion === 3 ? launchGalaxyFirework() : launch(), currentVersion === 3 ? 4200 : 700 + Math.random() * 850); } else { clearInterval(autoTimer); autoTimer = null; } });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { setGalaxyWatching(false); } if (e.target.closest('input') || e.target.closest('textarea')) return; if (e.key.toLowerCase() === 'c') clearSky(); if (e.key.toLowerCase() === 'r') currentVersion === 3 ? launchGalaxyFirework() : launch(); });
 window.addEventListener('resize', resize);
 resize();
 ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height);
